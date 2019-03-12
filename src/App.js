@@ -38,6 +38,7 @@ const initialState = {
 
 class App extends Component {
   constructor() {
+
     super();
     this.state = initialState;
   }
@@ -52,18 +53,51 @@ class App extends Component {
     }})
   }
 
+  //source:An array of n objects, each of them is a bounding_box
+  getCords = (source,width,height)=>{
+    let pos = {left_col:[],top_row:[],right_col:[],bottom_row:[]};
+    for(let i=0;i<source.length;i++){
+      for(const key in pos){
+        let val = pos[key];
+        if(pos.hasOwnProperty(key)){
+          let result;
+          if(key==='right_col'){
+            result = width - source[i][key] * width;
+          }else if(key==="left_col"){
+            result = source[i][key] * width;
+          }else if(key==="top_row"){
+            result = source[i][key] * height;
+          }else if(key==="bottom_row"){
+            result = height - source[i][key] * height;
+          }else{
+            console.log("Invalid outputs");
+          }
+          val.push(result);
+        }
+      }
+    }
+    return pos;
+  }
+
   calculateFaceLocation = (data) => {
-    const clarifaiFace = data.outputs[0].data.regions[0].region_info.bounding_box;
+    
+    //Multiple regions here
+
+    //Array of regions
+    const faces = data.outputs[0].data.regions;
+    const clarifaiFace = [];
+    for(let i=0;i<faces.length;i++){
+      clarifaiFace.push(faces[i].region_info.bounding_box);
+    }
+    // const clarifaiFace = data.outputs[0].data.regions[0].region_info.bounding_box;
     const image = document.getElementById('inputimage');
     const width = Number(image.width);
     const height = Number(image.height);
-    return {
-      leftCol: clarifaiFace.left_col * width,
-      topRow: clarifaiFace.top_row * height,
-      rightCol: width - (clarifaiFace.right_col * width),
-      bottomRow: height - (clarifaiFace.bottom_row * height)
-    }
+    const pos = this.getCords(clarifaiFace,width,height);
+    return pos;
   }
+
+  
 
   displayFaceBox = (box) => {
     this.setState({box: box});
@@ -74,7 +108,7 @@ class App extends Component {
   }
 
   onButtonSubmit = () => {
-    this.setState({imageUrl: this.state.input});
+    this.setState({imageUrl: this.state.input,box:{}});
       fetch('http://localhost:3000/imageurl', {
         method: 'post',
         headers: {'Content-Type': 'application/json'},
