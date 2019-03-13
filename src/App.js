@@ -55,28 +55,17 @@ class App extends Component {
 
   //source:An array of n objects, each of them is a bounding_box
   getCords = (source,width,height)=>{
-    let pos = {left_col:[],top_row:[],right_col:[],bottom_row:[]};
+    // let pos = {left_col:[],top_row:[],right_col:[],bottom_row:[]};
+
     for(let i=0;i<source.length;i++){
-      for(const key in pos){
-        let val = pos[key];
-        if(pos.hasOwnProperty(key)){
-          let result;
-          if(key==='right_col'){
-            result = width - source[i][key] * width;
-          }else if(key==="left_col"){
-            result = source[i][key] * width;
-          }else if(key==="top_row"){
-            result = source[i][key] * height;
-          }else if(key==="bottom_row"){
-            result = height - source[i][key] * height;
-          }else{
-            console.log("Invalid outputs");
-          }
-          val.push(result);
-        }
-      }
+        source[i].right_col = width - source[i].right_col * width;
+        source[i].left_col = source[i].left_col * width;
+        source[i].top_row =  source[i].top_row * height;
+        source[i].bottom_row = height - source[i].bottom_row * height;
     }
-    return pos;
+
+    return source;
+
   }
 
   calculateFaceLocation = (data) => {
