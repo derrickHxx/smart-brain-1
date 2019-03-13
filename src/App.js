@@ -24,7 +24,7 @@ const particlesOptions = {
 const initialState = {
   input: '',
   imageUrl: '',
-  box: {},
+  box: [],
   route: 'signin',
   isSignedIn: false,
   user: {
@@ -74,14 +74,17 @@ class App extends Component {
 
     //Array of regions
     const faces = data.outputs[0].data.regions;
-    const clarifaiFace = [];
-    for(let i=0;i<faces.length;i++){
-      clarifaiFace.push(faces[i].region_info.bounding_box);
-    }
+    const clarifaiFace = faces.map(face=>{
+      return face.region_info.bounding_box;
+    });
+    // for(let i=0;i<faces.length;i++){
+    //   clarifaiFace.push(faces[i].region_info.bounding_box);
+    // }
     // const clarifaiFace = data.outputs[0].data.regions[0].region_info.bounding_box;
     const image = document.getElementById('inputimage');
     const width = Number(image.width);
     const height = Number(image.height);
+    
     const pos = this.getCords(clarifaiFace,width,height);
     return pos;
   }
@@ -97,7 +100,7 @@ class App extends Component {
   }
 
   onButtonSubmit = () => {
-    this.setState({imageUrl: this.state.input,box:{}});
+    this.setState({imageUrl: this.state.input,box:[]});
       fetch('http://localhost:3000/imageurl', {
         method: 'post',
         headers: {'Content-Type': 'application/json'},
